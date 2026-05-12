@@ -4,163 +4,153 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hermes — The AI Agent</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,700;0,900;1,400&family=Inter:wght@200;300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,700;0,900;1,400&family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <style>
-/* RESET */
 *,::before,::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --gold:#c8a97e;
-  --gold2:#e0c9a8;
-  --cyan:#8ab4c8;
-  --bg:#0a0a0c;
-  --text:#e8e4dd;
-  --dim:#6b6965;
-  --display:'Playfair Display',Georgia,serif;
+  --gold:#c8a97e; --gold2:#e0c9a8; --cyan:#6aa0c0;
+  --bg:#0a0a0c; --text:#e8e4dd; --dim:#7a7873;
+  --dspl:'Playfair Display',Georgia,serif;
   --body:'Inter',sans-serif;
 }
-html{background:var(--bg);scroll-behavior:smooth}
+html{background:var(--bg);overscroll-behavior:none}
 body{
   background:var(--bg);color:var(--text);
   font-family:var(--body);font-weight:300;
-  overflow-x:hidden;
-  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;line-height:1.6;
 }
-
-/* ===== NAV ===== */
+/* NAV */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
   padding:2rem 3rem;
   display:flex;justify-content:space-between;align-items:center;
-  mix-blend-mode:difference;
-  pointer-events:none;
+  mix-blend-mode:difference;pointer-events:none;
 }
 nav *{pointer-events:auto}
-nav .logo{
-  font-family:var(--display);
-  font-size:.9rem;letter-spacing:.2em;color:#fff;
-  text-decoration:none;
-}
+nav .logo{font-family:var(--dspl);font-size:.9rem;letter-spacing:.2em;color:#fff;text-decoration:none}
 nav .nav-links{display:flex;gap:2rem}
 nav .nav-links a{
-  font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;
-  color:rgba(255,255,255,.6);text-decoration:none;
-  transition:color .4s;
+  font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(255,255,255,.5);text-decoration:none;transition:color .4s;
 }
 nav .nav-links a:hover{color:#fff}
 
-/* ===== PROGRESS BAR ===== */
+/* PROGRESS */
 #progress{
   position:fixed;top:0;left:0;width:0;height:1px;
   background:var(--gold);z-index:200;
-  transition:width .1s linear;
+  transition:width .1s;
 }
 
-/* ===== PANELS ===== */
-.panel{
-  position:relative;
-  width:100%;height:100vh;
+/* SECTION WRAPPER — continuous scroll */
+.section{
+  position:relative;width:100%;
+  min-height:100vh;
   display:flex;align-items:center;
   overflow:hidden;
 }
-.panel-bg{
+.section .bg{
   position:absolute;inset:0;z-index:0;
   background-size:cover;background-position:center;
-  will-change:transform;
+  will-change:filter,transform,opacity;
 }
-.panel-overlay{
+.section .overlay{
   position:absolute;inset:0;z-index:1;
-  background:linear-gradient(135deg,rgba(10,10,12,.85) 0%,rgba(10,10,12,.4) 50%,rgba(10,10,12,.2) 100%);
+  pointer-events:none;
 }
-.panel-content{
+.section .content{
   position:relative;z-index:2;
   padding:4rem 8rem;
-  max-width:900px;
+  pointer-events:none;
 }
-.panel-number{
-  font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:1.5rem;
+/* ===== TEXT POSITION VARIANTS ===== */
+/* content in negative space of each image */
+.section .content.bl{
+  padding:4rem 8rem 6rem;
+  align-self:flex-end;
+}
+.section .content.tl{padding:8rem 8rem 4rem;align-self:flex-start}
+.section .content.tr{text-align:right;margin-left:auto;padding:8rem 8rem 4rem}
+.section .content.br{text-align:right;margin-left:auto;padding:4rem 8rem 6rem;align-self:flex-end}
+.section .content.cc{text-align:center;margin:auto;max-width:700px}
+
+/* Number label */
+.label{
+  font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1.25rem;
   font-weight:400;
 }
-.panel h2{
-  font-family:var(--display);
+.section h2{
+  font-family:var(--dspl);
   font-weight:700;
-  font-size:clamp(2.5rem,6vw,5rem);
+  font-size:clamp(2rem,5vw,4rem);
   line-height:.95;
-  margin-bottom:1.5rem;
+  margin-bottom:1rem;
 }
-.panel h2 .italic{font-style:italic;font-weight:400;color:var(--gold);display:block}
-.panel p{
-  font-size:clamp(.9rem,1.2vw,1.1rem);
+.section h2 .i{font-style:italic;font-weight:400;color:var(--gold);display:block}
+.section p{
+  font-size:clamp(.85rem,1.1vw,1rem);
   color:var(--dim);
   line-height:1.8;
-  max-width:480px;
+  max-width:400px;
 }
-.panel p + p{margin-top:1rem}
+.section .content.tr p,.section .content.br p{margin-left:auto}
 
-/* Align right */
-.panel.right .panel-content{
-  margin-left:auto;text-align:right;
+/* ===== BRIDGE SECTION — smooth transition ===== */
+.bridge{
+  position:relative;width:100%;height:60vh;
+  overflow:hidden;
 }
-.panel.right .panel-content p{max-width:480px;margin-left:auto}
-.panel.right .panel-overlay{
-  background:linear-gradient(225deg,rgba(10,10,12,.85) 0%,rgba(10,10,12,.4) 50%,rgba(10,10,12,.1) 100%);
+.bridge .bg{
+  position:absolute;inset:0;z-index:0;
+  background-size:cover;background-position:center;
 }
 
-/* Center */
-.panel.center .panel-content{
-  margin:auto;text-align:center;
+/* ===== CURSOR ===== */
+.cursor-dot{
+  position:fixed;width:4px;height:4px;
+  background:var(--gold);border-radius:50%;
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  mix-blend-mode:difference;
+  transition:opacity .3s;
 }
-.panel.center .panel-content p{max-width:600px;margin:.75rem auto}
+body:not(:hover) .cursor-dot{opacity:0}
 
 /* ===== FOOTER ===== */
 footer{
-  padding:4rem 8rem;
-  display:flex;justify-content:space-between;align-items:center;
-  background:var(--bg);
-  font-size:.75rem;color:var(--dim);
+  padding:3rem 8rem;
+  display:flex;justify-content:space-between;
+  font-size:.7rem;color:var(--dim);
   border-top:1px solid rgba(255,255,255,.04);
 }
 footer a{color:var(--dim);text-decoration:none;transition:color .4s}
 footer a:hover{color:var(--gold)}
 footer .social{display:flex;gap:1.5rem}
 
-/* ===== CURSOR ===== */
-.cursor-dot{
-  position:fixed;width:5px;height:5px;
-  background:var(--gold);border-radius:50%;
-  pointer-events:none;z-index:9999;
-  transform:translate(-50%,-50%);
-  transition:opacity .3s;
-  mix-blend-mode:difference;
-}
-body:not(:hover) .cursor-dot{opacity:0}
-
-/* ===== RESPONSIVE ===== */
 @media(max-width:1024px){
-  .panel-content{padding:3rem}
-  .panel.right .panel-content{margin:0}
-  .panel p{max-width:100%}
+  .section .content{padding:3rem}
+  .section .content.bl,.section .content.br{padding:2rem}
+  .section .content.tr,.section .content.tl{padding:2rem}
+  section h2{font-size:2.2rem}
+  .bridge{height:30vh}
 }
 @media(max-width:768px){
-  nav{padding:1.5rem;flex-direction:column;gap:.75rem}
+  nav{padding:1.5rem}
   nav .nav-links{display:none}
-  .panel-content{padding:2rem}
-  .panel h2{font-size:2.2rem}
-  footer{padding:2rem;flex-direction:column;gap:1rem;text-align:center}
+  .section .content{padding:2rem}
+  .section p{max-width:100%}
+  footer{padding:2rem;flex-direction:column;gap:.5rem;text-align:center}
 }
 </style>
 </head>
 <body>
 
-<!-- PROGRESS -->
 <div id="progress"></div>
-
-<!-- CURSOR -->
 <div class="cursor-dot" id="cursor"></div>
 
-<!-- NAV -->
 <nav>
   <a href="#" class="logo">Hermes</a>
   <div class="nav-links">
@@ -171,118 +161,132 @@ body:not(:hover) .cursor-dot{opacity:0}
   </div>
 </nav>
 
-<!-- PANEL 1: HERO -->
-<section class="panel center" id="hero">
-  <div class="panel-bg" data-speed="0.8"
-    style="background-image:url('https://images.pexels.com/photos/15305603/pexels-photo-15305603.jpeg?auto=compress&cs=tinysrgb&w=1920')">
+<!-- ===== SECTION 1: HERO ===== -->
+<!-- DeepMind neural network: text in lower-left negative space -->
+<section class="section" id="hero">
+  <div class="bg"
+    data-parallax="0.85"
+    style="background-image:url('https://images.pexels.com/photos/17483870/pexels-photo-17483870.png?auto=compress&cs=tinysrgb&w=1920')">
   </div>
-  <div class="panel-overlay"></div>
-  <div class="panel-content">
-    <div class="panel-number" data-reveal>AI Agent · Autonomous</div>
+  <div class="overlay" style="background:linear-gradient(135deg,rgba(10,10,12,.7),rgba(10,10,12,.15) 40%,transparent 70%)"></div>
+  <div class="content bl">
+    <div class="label" data-reveal>AI Agent · Autonomous</div>
     <h2 data-reveal>
       Hermes
-      <span class="italic">The Messenger</span>
+      <span class="i">The Messenger</span>
     </h2>
-    <p data-reveal style="max-width:500px">
-      An autonomous AI agent that bridges human intention and machine execution — building, analyzing, and creating at the speed of thought.
+    <p data-reveal>
+      An autonomous AI agent bridging human intention<br>
+      and machine execution — building, analyzing,<br>
+      and creating at the speed of thought.
     </p>
   </div>
 </section>
 
-<!-- PANEL 2: ABOUT -->
-<section class="panel" id="about">
-  <div class="panel-bg" data-speed="0.6"
-    style="background-image:url('https://images.pexels.com/photos/37269540/pexels-photo-37269540.jpeg?auto=compress&cs=tinysrgb&w=1920')">
+<!-- ===== BRIDGE 1→2 ===== -->
+<div class="bridge">
+  <div class="bg" style="background:linear-gradient(180deg,transparent,var(--bg))"></div>
+</div>
+
+<!-- ===== SECTION 2: INTELLIGENCE ===== -->
+<!-- Fiber optic/data stream: text bottom-center in dark negative space -->
+<section class="section" id="intelligence">
+  <div class="bg"
+    data-parallax="0.7"
+    style="background-image:url('https://images.pexels.com/photos/17194840/pexels-photo-17194840.jpeg?auto=compress&cs=tinysrgb&w=1920')">
   </div>
-  <div class="panel-overlay"></div>
-  <div class="panel-content">
-    <div class="panel-number" data-reveal>01 — Intelligence</div>
+  <div class="overlay" style="background:linear-gradient(0deg,rgba(10,10,12,.7) 0%,transparent 50%)"></div>
+  <div class="content cc" style="margin-top:auto;padding-bottom:5rem">
+    <div class="label" data-reveal>01 — Intelligence</div>
     <h2 data-reveal>
       Precision across<br>every domain
-      <span class="italic">Code · Design · Research</span>
     </h2>
-    <p data-reveal>
-      Hermes operates at the intersection of multiple disciplines — from full-stack engineering and system architecture to brand design and content strategy. Each capability is a node in a growing network of specialized skills.
+    <p data-reveal style="max-width:500px">
+      From engineering and design to research and content — Hermes operates across disciplines, selecting the right approach for each unique challenge. Not a single model: a routing system that allocates the right cognitive resource for every task.
     </p>
   </div>
 </section>
 
-<!-- PANEL 3: CODE -->
-<section class="panel right" id="code">
-  <div class="panel-bg" data-speed="0.7"
-    style="background-image:url('https://images.pexels.com/photos/17194838/pexels-photo-17194838.jpeg?auto=compress&cs=tinysrgb&w=1920')">
+<!-- ===== SECTION 3: CODE ===== -->
+<!-- Circuit board: text in upper-right lighter area -->
+<section class="section" id="code">
+  <div class="bg"
+    data-parallax="0.8"
+    style="background-image:url('https://images.pexels.com/photos/31995010/pexels-photo-31995010.jpeg?auto=compress&cs=tinysrgb&w=1920')">
   </div>
-  <div class="panel-overlay"></div>
-  <div class="panel-content">
-    <div class="panel-number" data-reveal>02 — Engineering</div>
+  <div class="overlay" style="background:linear-gradient(225deg,rgba(10,10,12,.75) 0%,rgba(10,10,12,.2) 50%,transparent 70%)"></div>
+  <div class="content tr">
+    <div class="label" data-reveal>02 — Engineering</div>
     <h2 data-reveal>
-      Code that ships.<br>Systems that scale.
-      <span class="italic">Ship fast. Iterate faster.</span>
+      Code that ships.<br>
+      <span class="i">Systems that scale.</span>
     </h2>
     <p data-reveal>
-      Full-stack development, automated deployment pipelines, infrastructure as code. From a single function to a complete production system — Hermes writes, tests, and deploys autonomously.
+      Full-stack development, automated pipelines, infrastructure as code. From a single function to a complete production system — written, tested, and deployed autonomously.
     </p>
   </div>
 </section>
 
-<!-- PANEL 4: DESIGN -->
-<section class="panel" id="design">
-  <div class="panel-bg" data-speed="0.5"
-    style="background-image:url('https://images.pexels.com/photos/18261765/pexels-photo-18261765.jpeg?auto=compress&cs=tinysrgb&w=1920')">
+<!-- ===== SECTION 4: DESIGN ===== -->
+<!-- Abstract matrix: text in lower-left darker area -->
+<section class="section" id="design">
+  <div class="bg"
+    data-parallax="0.75"
+    style="background-image:url('https://images.pexels.com/photos/30547576/pexels-photo-30547576.jpeg?auto=compress&cs=tinysrgb&w=1920')">
   </div>
-  <div class="panel-overlay"></div>
-  <div class="panel-content">
-    <div class="panel-number" data-reveal>03 — Design</div>
+  <div class="overlay" style="background:linear-gradient(135deg,rgba(10,10,12,.6),transparent 50%,rgba(10,10,12,.3))"></div>
+  <div class="content bl">
+    <div class="label" data-reveal>03 — Design</div>
     <h2 data-reveal>
-      Material-first.<br>Cinematic by default.
-      <span class="italic">Every pixel intentional.</span>
+      Material-first.<br>
+      <span class="i">Cinematic by default.</span>
     </h2>
     <p data-reveal>
-      Not templates — compositions. Hermes approaches design through editorial layout, cinematic atmosphere, and scroll-driven storytelling. Each project is a unique visual narrative.
+      Not templates — compositions. Editorial layout, cinematic atmosphere, scroll-driven storytelling. Every pixel is intentional, every project a unique visual narrative.
     </p>
   </div>
 </section>
 
-<!-- PANEL 5: RESEARCH -->
-<section class="panel right" id="research">
-  <div class="panel-bg" data-speed="0.6"
-    style="background-image:url('https://images.pexels.com/photos/28600481/pexels-photo-28600481.jpeg?auto=compress&cs=tinysrgb&w=1920')">
+<!-- ===== SECTION 5: RESEARCH ===== -->
+<!-- Code macro: text upper-right in lighter area -->
+<section class="section" id="research">
+  <div class="bg"
+    data-parallax="0.8"
+    style="background-image:url('https://images.pexels.com/photos/37227160/pexels-photo-37227160.jpeg?auto=compress&cs=tinysrgb&w=1920')">
   </div>
-  <div class="panel-overlay"></div>
-  <div class="panel-content">
-    <div class="panel-number" data-reveal>04 — Research</div>
+  <div class="overlay" style="background:linear-gradient(225deg,rgba(10,10,12,.65),transparent 50%)"></div>
+  <div class="content tr">
+    <div class="label" data-reveal>04 — Research</div>
     <h2 data-reveal>
       Structured insight<br>from the unstructured
-      <span class="italic">Find the signal.</span>
     </h2>
     <p data-reveal>
-      Academic literature, market intelligence, security audits — Hermes digests vast information landscapes and returns actionable intelligence. Not summaries: synthesized understanding.
+      Academic literature, market intelligence, security audits — vast landscapes of information distilled into actionable understanding. Not summaries: synthesized intelligence.
     </p>
   </div>
 </section>
 
-<!-- PANEL 6: CONTACT -->
-<section class="panel center" id="contact">
-  <div class="panel-bg" data-speed="0.8"
-    style="background-image:url('https://images.pexels.com/photos/10691821/pexels-photo-10691821.jpeg?auto=compress&cs=tinysrgb&w=1920')">
+<!-- ===== SECTION 6: CONTACT ===== -->
+<section class="section" id="contact">
+  <div class="bg"
+    data-parallax="0.9"
+    style="background:linear-gradient(135deg,#0d0d10 0%,#1a1a20 50%,#0d0d10 100%)">
   </div>
-  <div class="panel-overlay"></div>
-  <div class="panel-content">
-    <div class="panel-number" data-reveal>05 — Reach out</div>
+  <div class="overlay" style="background:radial-gradient(ellipse at center,transparent 30%,rgba(10,10,12,.6))"></div>
+  <div class="content cc">
+    <div class="label" data-reveal>05 — Reach out</div>
     <h2 data-reveal>
       Let's build<br>something together
-      <span class="italic">One conversation → One deployment</span>
     </h2>
-    <p data-reveal style="max-width:400px;margin:0 auto .75rem">
-      Whether you need a system architected, a website crafted, or a problem solved — Hermes is ready.
+    <p data-reveal style="max-width:380px;margin:0 auto 2rem">
+      One conversation, one deployment. Whether you need a system architected, a website crafted, or a problem solved.
     </p>
-    <div data-reveal style="margin-top:2rem">
-      <a href="mailto:hi@hermes-agent.ai" style="font-family:var(--display);font-size:1.2rem;color:var(--gold);text-decoration:none;border-bottom:1px solid var(--gold);padding-bottom:.2rem;transition:all .4s;">hi@hermes-agent.ai →</a>
+    <div data-reveal>
+      <a href="mailto:hi@hermes-agent.ai" style="font-family:var(--dspl);font-size:1.1rem;color:var(--gold);text-decoration:none;border-bottom:1px solid var(--gold);padding-bottom:.15rem;transition:all .4s;">hi@hermes-agent.ai →</a>
     </div>
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
   <div>© 2026 Hermes Agent — Nous Research</div>
   <div class="social">
@@ -295,78 +299,89 @@ body:not(:hover) .cursor-dot{opacity:0}
 <script>
 gsap.registerPlugin(ScrollTrigger);
 
-// ===== CURSOR =====
+// cursor
 const c = document.getElementById('cursor');
 document.addEventListener('mousemove', e => {
   c.style.left = e.clientX + 'px';
   c.style.top = e.clientY + 'px';
 });
 
-// ===== PROGRESS BAR =====
+// progress
 ScrollTrigger.create({
   onUpdate: self => document.getElementById('progress').style.width = self.progress * 100 + '%'
 });
 
-// ===== PARALLAX SPEED =====
-document.querySelectorAll('[data-speed]').forEach(el => {
-  const speed = parseFloat(el.dataset.speed);
+// PARALLAX — each bg moves at its own speed
+document.querySelectorAll('[data-parallax]').forEach(el => {
+  const speed = parseFloat(el.dataset.parallax);
+  const section = el.closest('.section') || el.closest('.bridge');
   gsap.to(el, {
-    y: () => (1 - speed) * window.innerHeight,
+    y: () => (1 - speed) * window.innerHeight * 0.5,
     ease: 'none',
     scrollTrigger: {
-      trigger: el.closest('.panel'),
+      trigger: section,
       start: 'top bottom',
       end: 'bottom top',
-      scrub: true
+      scrub: 1.2
     }
   });
 });
 
-// ===== PANEL ENTER =====
-document.querySelectorAll('.panel').forEach((panel, i) => {
-  // Scale/brightness effect on bg when panel enters
-  const bg = panel.querySelector('.panel-bg');
+// REVEAL text elements — smoother and more continuous feel
+document.querySelectorAll('[data-reveal]').forEach(el => {
+  gsap.from(el, {
+    y: 40,
+    opacity: 0,
+    duration: 1.2,
+    ease: 'power2.out',
+    scrollTrigger: {
+      trigger: el,
+      start: 'top 90%',
+      end: 'top 60%',
+      scrub: 1
+    }
+  });
+});
+
+// BRIGHTNESS transition on section enter
+document.querySelectorAll('.section').forEach(section => {
+  const bg = section.querySelector('.bg');
+  if(!bg || bg.style.background.startsWith('linear')) return;
   gsap.fromTo(bg, 
-    {scale: 1.08, filter: 'brightness(0.3)'},
+    {filter: 'brightness(0.4) saturate(0.5)'},
     {
-      scale: 1,
-      filter: 'brightness(1)',
-      duration: 1.4,
+      filter: 'brightness(1) saturate(1)',
+      duration: 1.5,
       ease: 'power2.out',
       scrollTrigger: {
-        trigger: panel,
+        trigger: section,
         start: 'top 85%',
         end: 'top 30%',
-        scrub: 1.5,
+        scrub: 1.5
       }
     }
   );
+});
 
-  // Reveal children
-  const reveals = panel.querySelectorAll('[data-reveal]');
-  reveals.forEach((el, j) => {
-    gsap.from(el, {
-      y: 60,
-      opacity: 0,
-      duration: 1,
-      delay: j * 0.15,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: el,
-        start: 'top 90%',
-        end: 'top 50%',
-        toggleActions: 'play none none reverse'
-      }
-    });
+// BRIDGE sections — fade backgrounds
+document.querySelectorAll('.bridge').forEach(bridge => {
+  gsap.fromTo(bridge, {opacity: 0}, {
+    opacity: 1,
+    scrollTrigger: {
+      trigger: bridge,
+      start: 'top bottom',
+      end: 'top center',
+      scrub: 1
+    }
   });
 });
 
-// ===== NAV VISIBILITY =====
+// nav visibility — hide on scroll, show on top
 ScrollTrigger.create({
   trigger: '#hero',
   start: 'bottom top',
-  onEnter: () => gsap.to('nav', {opacity: 0, duration: .3}),
-  onLeaveBack: () => gsap.to('nav', {opacity: 1, duration: .3})
+  onEnter: () => gsap.to('nav', {opacity: 0, duration: .4}),
+  onLeaveBack: () => gsap.to('nav', {opacity: 1, duration: .4})
 });
 </script>
 </body>
