@@ -4,672 +4,281 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hermes — The AI Agent</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,700;0,900;1,400&family=Inter:wght@200;300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <style>
-/* ===== RESET & BASE ===== */
-*,::before,::after{box-sizing:border-box;margin:0;padding:0}
+/* RESET */
+*,::before,::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#0d0d0e;
-  --bg2:#141416;
+  --gold:#c8a97e;
+  --gold2:#e0c9a8;
+  --cyan:#8ab4c8;
+  --bg:#0a0a0c;
   --text:#e8e4dd;
-  --text-dim:#7c7a75;
-  --accent:#c8a97e;
-  --accent2:#a8c0d0;
-  --accent-glow:rgba(200,169,126,0.08);
-  --border:rgba(255,255,255,0.06);
-  --font-display:'Playfair Display',Georgia,serif;
-  --font-body:'Inter',-apple-system,sans-serif;
-  --letterbox:0px;
-  --scroll-pct:0;
+  --dim:#6b6965;
+  --display:'Playfair Display',Georgia,serif;
+  --body:'Inter',sans-serif;
 }
-html{font-size:16px;scroll-behavior:smooth}
+html{background:var(--bg);scroll-behavior:smooth}
 body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:var(--font-body);
-  font-weight:300;
-  line-height:1.6;
+  background:var(--bg);color:var(--text);
+  font-family:var(--body);font-weight:300;
   overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
 }
 
-/* ===== LETTERBOX CINEMATIC BARS ===== */
-.letterbox-top,.letterbox-bottom{
-  position:fixed;left:0;right:0;z-index:9999;
-  background:#000;
-  transition:height .8s cubic-bezier(.16,1,.3,1);
+/* ===== NAV ===== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:2rem 3rem;
+  display:flex;justify-content:space-between;align-items:center;
+  mix-blend-mode:difference;
   pointer-events:none;
 }
-.letterbox-top{top:0;height:var(--letterbox)}
-.letterbox-bottom{bottom:0;height:var(--letterbox)}
+nav *{pointer-events:auto}
+nav .logo{
+  font-family:var(--display);
+  font-size:.9rem;letter-spacing:.2em;color:#fff;
+  text-decoration:none;
+}
+nav .nav-links{display:flex;gap:2rem}
+nav .nav-links a{
+  font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;
+  color:rgba(255,255,255,.6);text-decoration:none;
+  transition:color .4s;
+}
+nav .nav-links a:hover{color:#fff}
 
-/* ===== SCROLL PROGRESS ===== */
-.scroll-progress{
-  position:fixed;top:0;left:0;height:1px;z-index:9998;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  width:var(--scroll-pct);
+/* ===== PROGRESS BAR ===== */
+#progress{
+  position:fixed;top:0;left:0;width:0;height:1px;
+  background:var(--gold);z-index:200;
   transition:width .1s linear;
-  opacity:0.5;
 }
 
-/* ===== FILM GRAIN ===== */
-.grain-overlay{
-  position:fixed;inset:0;z-index:1;
-  pointer-events:none;opacity:0.035;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size:256px 256px;
-}
-
-/* ===== VIGNETTE ===== */
-.vignette{
-  position:fixed;inset:0;z-index:2;
-  pointer-events:none;
-  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.65) 100%);
-}
-
-/* ===== CURSOR ===== */
-.cursor-dot{
-  position:fixed;width:6px;height:6px;
-  background:var(--accent);border-radius:50%;
-  pointer-events:none;z-index:10000;
-  transform:translate(-50%,-50%);
-  transition:opacity .3s,width .3s,height .3s;
-  mix-blend-mode:difference;
-}
-.cursor-ring{
-  position:fixed;width:40px;height:40px;
-  border:1px solid var(--accent);border-radius:50%;
-  pointer-events:none;z-index:9999;
-  transform:translate(-50%,-50%);
-  transition:all .1s ease-out,width .3s,height .3s,border-color .3s;
-  mix-blend-mode:difference;
-}
-.cursor-ring.active{width:60px;height:60px;border-color:var(--accent2)}
-body:not(:hover) .cursor-dot,body:not(:hover) .cursor-ring{opacity:0}
-
-/* ===== LOADING ===== */
-.loading-screen{
-  position:fixed;inset:0;z-index:10001;
-  background:var(--bg);
-  display:flex;align-items:center;justify-content:center;
-  flex-direction:column;
-  transition:opacity 1s ease,visibility 1s ease;
-}
-.loading-screen.hidden{opacity:0;visibility:hidden}
-.loading-screen h1{
-  font-family:var(--font-display);
-  font-weight:300;font-size:clamp(1.5rem,4vw,3rem);
-  color:var(--accent);letter-spacing:.3em;
-  margin-bottom:2rem;
-}
-.loading-bar{
-  width:100px;height:1px;
-  background:rgba(255,255,255,0.1);overflow:hidden;
-}
-.loading-bar-fill{
-  height:100%;width:0%;
-  background:var(--accent);
-  animation:loadFill 1.2s ease forwards;
-}
-@keyframes loadFill{to{width:100%}}
-
-/* ===== SECTIONS ===== */
-section{padding:0;position:relative;z-index:3}
-
-/* ===== HERO ===== */
-.hero{
-  min-height:100vh;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  align-items:center;
+/* ===== PANELS ===== */
+.panel{
   position:relative;
+  width:100%;height:100vh;
+  display:flex;align-items:center;
   overflow:hidden;
-  background:var(--bg);
 }
-.hero::before{
-  content:'';position:absolute;inset:0;
-  background:
-    radial-gradient(ellipse 80% 60% at 30% 50%,rgba(200,169,126,0.04),transparent),
-    radial-gradient(ellipse 60% 80% at 70% 50%,rgba(168,192,208,0.03),transparent);
-  z-index:0;
+.panel-bg{
+  position:absolute;inset:0;z-index:0;
+  background-size:cover;background-position:center;
+  will-change:transform;
 }
-.hero-text{
-  padding:4rem 4rem 4rem 8rem;
-  position:relative;z-index:1;
+.panel-overlay{
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(135deg,rgba(10,10,12,.85) 0%,rgba(10,10,12,.4) 50%,rgba(10,10,12,.2) 100%);
 }
-.hero-badge{
-  display:inline-block;
-  font-family:var(--font-body);
-  font-size:.7rem;font-weight:500;letter-spacing:.25em;text-transform:uppercase;
-  color:var(--accent);margin-bottom:2rem;
-  border:1px solid var(--border);
-  padding:.5rem 1rem;
-  opacity:0;transform:translateY(10px);
-  animation:fadeUp .8s .3s forwards;
+.panel-content{
+  position:relative;z-index:2;
+  padding:4rem 8rem;
+  max-width:900px;
 }
-.hero h1{
-  font-family:var(--font-display);
-  font-weight:700;
-  font-size:clamp(3.5rem,8vw,7rem);
-  line-height:0.92;
-  letter-spacing:-.02em;
-  margin-bottom:2rem;
-  opacity:0;transform:translateY(20px);
-  animation:fadeUp .8s .5s forwards;
-}
-.hero h1 .accent{
-  color:var(--accent);
-  font-style:italic;
+.panel-number{
+  font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1.5rem;
   font-weight:400;
-  display:block;
 }
-.hero-sub{
-  font-size:clamp(1rem,1.4vw,1.2rem);
-  color:var(--text-dim);
-  max-width:420px;
-  line-height:1.7;
-  margin-bottom:2.5rem;
-  opacity:0;transform:translateY(20px);
-  animation:fadeUp .8s .7s forwards;
-}
-.hero-cta{
-  opacity:0;transform:translateY(20px);
-  animation:fadeUp .8s .9s forwards;
-}
-.hero-cta a{
-  display:inline-block;
-  font-family:var(--font-body);
-  font-size:.8rem;font-weight:500;letter-spacing:.15em;text-transform:uppercase;
-  color:var(--text);
-  text-decoration:none;
-  padding:.7rem 2rem;
-  border:1px solid var(--border);
-  transition:all .4s;
-  position:relative;
-  overflow:hidden;
-}
-.hero-cta a::before{
-  content:'';position:absolute;inset:0;
-  background:var(--accent);opacity:0;
-  transition:opacity .4s;
-}
-.hero-cta a:hover::before{opacity:.15}
-.hero-cta a:hover{border-color:var(--accent);color:var(--accent)}
-
-.hero-visual{
-  position:relative;height:100vh;
-  display:flex;align-items:center;justify-content:center;
-  overflow:hidden;
-}
-.hero-visual::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,var(--bg) 0%,transparent 30%);
-  z-index:2;
-}
-.hero-visual img{
-  width:100%;height:100%;object-fit:cover;
-  opacity:0;
-  animation:imgReveal 1.2s .8s forwards;
-  filter:brightness(0.7) contrast(1.1) saturate(0.8) sepia(0.05);
-}
-@keyframes imgReveal{to{opacity:1}}
-.hero-visual .glow{
-  position:absolute;
-  width:60%;padding-bottom:60%;
-  border-radius:50%;
-  background:radial-gradient(circle,var(--accent-glow),transparent 70%);
-  z-index:1;
-  pointer-events:none;
-}
-
-@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
-
-/* ===== SCROLL INDICATOR ===== */
-.scroll-indicator{
-  position:absolute;bottom:2.5rem;left:8rem;z-index:3;
-  display:flex;align-items:center;gap:.75rem;
-  opacity:0;
-  animation:fadeUp .8s 1.4s forwards;
-}
-.scroll-line{
-  width:1px;height:40px;
-  background:linear-gradient(to bottom,var(--accent),transparent);
-}
-.scroll-label{
-  font-family:var(--font-body);
-  font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;
-  color:var(--text-dim);
-}
-
-/* ===== SECTION COMMON ===== */
-.section-header{
-  padding:8rem 8rem 4rem;
-  max-width:1400px;
-  margin:0 auto;
-}
-.section-number{
-  font-family:var(--font-body);
-  font-size:.75rem;font-weight:500;letter-spacing:.2em;
-  color:var(--accent);margin-bottom:1rem;
-}
-.section-title{
-  font-family:var(--font-display);
+.panel h2{
+  font-family:var(--display);
   font-weight:700;
-  font-size:clamp(2rem,4vw,3.5rem);
-  line-height:1.1;
-  margin-bottom:1rem;
-}
-.section-desc{
-  color:var(--text-dim);max-width:480px;
-}
-
-/* ===== ABOUT ===== */
-.about{
-  padding:6rem 8rem;
-  display:grid;
-  grid-template-columns:1fr 1.5fr;
-  gap:6rem;
-  max-width:1400px;
-  margin:0 auto;
-}
-.about-visual{
-  position:relative;
-}
-.about-visual .portrait-frame{
-  width:100%;aspect-ratio:3/4;
-  overflow:hidden;position:relative;
-  background:var(--bg2);
-}
-.about-visual .portrait-frame img{
-  width:100%;height:100%;object-fit:cover;
-  filter:brightness(0.8) contrast(1.05) saturate(0.7) sepia(0.03);
-  transition:filter .5s;
-}
-.about-visual .portrait-frame:hover img{filter:brightness(0.9) contrast(1) saturate(0.75)}
-.about-visual .frame-line{
-  position:absolute;inset:0;
-  border:1px solid var(--border);
-  transform:translate(8px,-8px);
-  pointer-events:none;
-}
-.about-content h2{
-  font-family:var(--font-display);
-  font-weight:700;font-size:clamp(1.8rem,3vw,2.5rem);
+  font-size:clamp(2.5rem,6vw,5rem);
+  line-height:.95;
   margin-bottom:1.5rem;
 }
-.about-content p{
-  color:var(--text-dim);
-  margin-bottom:1.5rem;
-  font-size:.95rem;
+.panel h2 .italic{font-style:italic;font-weight:400;color:var(--gold);display:block}
+.panel p{
+  font-size:clamp(.9rem,1.2vw,1.1rem);
+  color:var(--dim);
   line-height:1.8;
+  max-width:480px;
+}
+.panel p + p{margin-top:1rem}
+
+/* Align right */
+.panel.right .panel-content{
+  margin-left:auto;text-align:right;
+}
+.panel.right .panel-content p{max-width:480px;margin-left:auto}
+.panel.right .panel-overlay{
+  background:linear-gradient(225deg,rgba(10,10,12,.85) 0%,rgba(10,10,12,.4) 50%,rgba(10,10,12,.1) 100%);
 }
 
-/* ===== CAPABILITIES ===== */
-.capabilities{
-  background:var(--bg2);
-  padding:6rem 8rem;
+/* Center */
+.panel.center .panel-content{
+  margin:auto;text-align:center;
 }
-.capabilities-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:2px;
-  max-width:1400px;
-  margin:0 auto;
-  background:var(--border);
-}
-.cap-card{
-  background:var(--bg);
-  padding:3rem;
-  position:relative;
-  transition:background .4s;
-}
-.cap-card:hover{background:var(--bg2)}
-.cap-number{
-  font-family:var(--font-body);
-  font-size:.7rem;font-weight:500;letter-spacing:.15em;
-  color:var(--accent);margin-bottom:2rem;
-}
-.cap-card h3{
-  font-family:var(--font-display);
-  font-size:1.3rem;font-weight:700;
-  margin-bottom:1rem;
-}
-.cap-card p{
-  color:var(--text-dim);font-size:.85rem;line-height:1.7;
-}
-
-/* ===== WORK ===== */
-.work{
-  padding:6rem 8rem;
-  max-width:1400px;
-  margin:0 auto;
-}
-.work-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:2px;
-  background:var(--border);
-}
-.work-item{
-  background:var(--bg);
-  padding:3rem;
-  position:relative;
-  transition:background .4s;
-  cursor:pointer;
-  overflow:hidden;
-}
-.work-item:hover{background:var(--bg2)}
-.work-item .tag{
-  display:inline-block;
-  font-size:.65rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--accent);margin-bottom:1.5rem;
-  border:1px solid var(--border);padding:.25rem .75rem;
-}
-.work-item h3{
-  font-family:var(--font-display);
-  font-size:1.2rem;margin-bottom:.5rem;
-}
-.work-item p{
-  color:var(--text-dim);font-size:.85rem;
-}
-.work-item .arrow{
-  position:absolute;bottom:2rem;right:2rem;
-  font-size:1.2rem;color:var(--accent);
-  opacity:0;transform:translateX(-10px);
-  transition:all .4s;
-}
-.work-item:hover .arrow{opacity:1;transform:translateX(0)}
-
-/* ===== CONTACT ===== */
-.contact{
-  padding:6rem 8rem 8rem;
-  text-align:center;
-  max-width:700px;
-  margin:0 auto;
-}
-.contact h2{
-  font-family:var(--font-display);
-  font-size:clamp(2rem,4vw,3rem);
-  margin-bottom:1.5rem;
-}
-.contact p{
-  color:var(--text-dim);margin-bottom:3rem;
-}
-.contact-email{
-  display:inline-block;
-  font-family:var(--font-display);
-  font-size:clamp(1.2rem,2vw,1.8rem);
-  color:var(--accent);
-  text-decoration:none;
-  border-bottom:1px solid var(--accent);
-  padding-bottom:.25rem;
-  transition:all .4s;
-}
-.contact-email:hover{color:var(--accent2);border-color:var(--accent2)}
+.panel.center .panel-content p{max-width:600px;margin:.75rem auto}
 
 /* ===== FOOTER ===== */
 footer{
-  padding:2rem 8rem;
+  padding:4rem 8rem;
   display:flex;justify-content:space-between;align-items:center;
-  border-top:1px solid var(--border);
-  font-size:.75rem;color:var(--text-dim);
-  position:relative;z-index:3;
+  background:var(--bg);
+  font-size:.75rem;color:var(--dim);
+  border-top:1px solid rgba(255,255,255,.04);
 }
-footer a{
-  color:var(--text-dim);text-decoration:none;
-  transition:color .3s;
-}
-footer a:hover{color:var(--accent)}
+footer a{color:var(--dim);text-decoration:none;transition:color .4s}
+footer a:hover{color:var(--gold)}
 footer .social{display:flex;gap:1.5rem}
 
-/* ===== REVEAL ANIMATION ===== */
-.reveal{
-  opacity:0;transform:translateY(30px);
-  transition:all .8s cubic-bezier(.16,1,.3,1);
+/* ===== CURSOR ===== */
+.cursor-dot{
+  position:fixed;width:5px;height:5px;
+  background:var(--gold);border-radius:50%;
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:opacity .3s;
+  mix-blend-mode:difference;
 }
-.reveal.visible{opacity:1;transform:translateY(0)}
+body:not(:hover) .cursor-dot{opacity:0}
 
 /* ===== RESPONSIVE ===== */
 @media(max-width:1024px){
-  .hero{grid-template-columns:1fr}
-  .hero-text{padding:6rem 3rem 3rem}
-  .hero-visual{display:none}
-  .scroll-indicator{left:3rem}
-  .section-header{padding:4rem 3rem 2rem}
-  .about{padding:3rem;grid-template-columns:1fr;gap:3rem}
-  .capabilities{padding:3rem}
-  .capabilities-grid{grid-template-columns:1fr}
-  .work{padding:3rem}
-  .work-grid{grid-template-columns:1fr}
-  .contact{padding:4rem 3rem}
-  footer{padding:2rem 3rem;flex-direction:column;gap:1rem;text-align:center}
+  .panel-content{padding:3rem}
+  .panel.right .panel-content{margin:0}
+  .panel p{max-width:100%}
 }
 @media(max-width:768px){
-  .letterbox-top,.letterbox-bottom{display:none}
-  .cursor-dot,.cursor-ring{display:none}
-  .hero-text{padding:5rem 2rem 2rem}
-  .hero h1{font-size:clamp(2.5rem,10vw,4rem)}
-  .about{padding:2rem}
-  .capabilities{padding:2rem}
-  .cap-card{padding:2rem}
-  .work{padding:2rem}
-  .work-item{padding:2rem}
-  .contact{padding:3rem 2rem}
-  footer{padding:1.5rem 2rem}
-}
-
-/* ===== LINE DIVIDER ===== */
-.divider{
-  height:1px;
-  background:linear-gradient(90deg,var(--border),var(--accent),var(--border));
-  max-width:1400px;margin:0 auto;
-  opacity:.5;
-}
-
-/* ===== BACKGROUND TEXTURE ===== */
-.bg-texture{
-  position:fixed;inset:0;z-index:0;
-  background-image:url('https://raw.githubusercontent.com/yihangwu539-png/hermes-brand/main/dark-marble-bg.jpg');
-  background-size:cover;background-position:center;
-  opacity:0.06;
-  pointer-events:none;
-}
-.bg-texture::after{
-  content:'';position:absolute;inset:0;
-  background:
-    radial-gradient(ellipse 100% 80% at 50% 0%,rgba(200,169,126,0.02),transparent),
-    radial-gradient(ellipse 80% 60% at 80% 100%,rgba(168,192,208,0.015),transparent);
-}
-
-/* ===== HERO NOISE ===== */
-.hero::after{
-  content:'';position:absolute;inset:0;z-index:1;
-  background:
-    radial-gradient(ellipse at 20% 50%,rgba(200,169,126,0.03),transparent 50%),
-    radial-gradient(ellipse at 80% 30%,rgba(168,192,208,0.02),transparent 50%);
-  pointer-events:none;
+  nav{padding:1.5rem;flex-direction:column;gap:.75rem}
+  nav .nav-links{display:none}
+  .panel-content{padding:2rem}
+  .panel h2{font-size:2.2rem}
+  footer{padding:2rem;flex-direction:column;gap:1rem;text-align:center}
 }
 </style>
 </head>
 <body>
 
-<!-- LOADING SCREEN -->
-<div class="loading-screen" id="loading">
-  <h1>Hermes</h1>
-  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
-</div>
+<!-- PROGRESS -->
+<div id="progress"></div>
 
-<!-- CINEMATIC BARS -->
-<div class="letterbox-top" id="letterboxTop"></div>
-<div class="letterbox-bottom" id="letterboxBottom"></div>
-
-<!-- PROGRESS BAR -->
-<div class="scroll-progress" id="progress"></div>
-
-<!-- OVERLAYS -->
-<div class="grain-overlay"></div>
-<div class="vignette"></div>
-<div class="bg-texture"></div>
-
-<!-- CUSTOM CURSOR -->
+<!-- CURSOR -->
 <div class="cursor-dot" id="cursor"></div>
-<div class="cursor-ring" id="ring"></div>
 
-<!-- HERO -->
-<section class="hero" id="home">
-  <div class="hero-text">
-    <div class="hero-badge">AI AGENT · AUTONOMOUS</div>
-    <h1>
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">Hermes</a>
+  <div class="nav-links">
+    <a href="#">The Agent</a>
+    <a href="#">Capabilities</a>
+    <a href="#">Work</a>
+    <a href="#">Contact</a>
+  </div>
+</nav>
+
+<!-- PANEL 1: HERO -->
+<section class="panel center" id="hero">
+  <div class="panel-bg" data-speed="0.8"
+    style="background-image:url('https://images.pexels.com/photos/15305603/pexels-photo-15305603.jpeg?auto=compress&cs=tinysrgb&w=1920')">
+  </div>
+  <div class="panel-overlay"></div>
+  <div class="panel-content">
+    <div class="panel-number" data-reveal>AI Agent · Autonomous</div>
+    <h2 data-reveal>
       Hermes
-      <span class="accent">The Messenger</span>
-    </h1>
-    <p class="hero-sub">
-      An autonomous AI agent orchestrating the space between<br>
-      human intention and machine execution —<br>
-      building, analyzing, and creating at the speed of thought.
+      <span class="italic">The Messenger</span>
+    </h2>
+    <p data-reveal style="max-width:500px">
+      An autonomous AI agent that bridges human intention and machine execution — building, analyzing, and creating at the speed of thought.
     </p>
-    <div class="hero-cta">
-      <a href="#capabilities">Explore Capabilities</a>
-    </div>
-  </div>
-  <div class="hero-visual">
-    <div class="glow"></div>
-    <img src="https://images.pexels.com/photos/30542776/pexels-photo-30542776.jpeg?auto=compress&cs=tinysrgb&w=1920" alt="Hermes messenger">
-  </div>
-  <div class="scroll-indicator">
-    <div class="scroll-line"></div>
-    <span class="scroll-label">Scroll</span>
   </div>
 </section>
 
-<!-- ABOUT -->
-<section id="about">
-  <div class="section-header">
-    <div class="section-number reveal">01 — About</div>
-    <h2 class="section-title reveal">Bridging vision<br>and execution</h2>
-    <p class="section-desc reveal">Hermes operates at the intersection of intelligence, automation, and craft — a system that doesn't just answer questions but builds solutions.</p>
+<!-- PANEL 2: ABOUT -->
+<section class="panel" id="about">
+  <div class="panel-bg" data-speed="0.6"
+    style="background-image:url('https://images.pexels.com/photos/37269540/pexels-photo-37269540.jpeg?auto=compress&cs=tinysrgb&w=1920')">
   </div>
-  <div class="about">
-    <div class="about-visual reveal">
-      <div class="portrait-frame">
-        <img src="https://raw.githubusercontent.com/yihangwu539-png/hermes-brand/main/hermes-portrait.png" alt="Hermes AI Agent portrait">
-        <div class="frame-line"></div>
-      </div>
-    </div>
-    <div class="about-content reveal">
-      <h2>An agent designed<br>to deliver</h2>
-      <p>
-        Named after the messenger of the gods, Hermes embodies the idea that 
-        intelligence isn't just about knowing — it's about reaching. Every 
-        interaction is orchestrated through a layered system of reasoning, 
-        tool selection, and adaptive context management.
-      </p>
-      <p>
-        From code generation to brand architecture, from security analysis to 
-        visual design — Hermes navigates complexity with precision, deploying 
-        the right model and the right approach for each unique challenge.
-      </p>
-      <p>
-        Built on Nous Research's agent framework, extended with custom 
-        capabilities, persistent memory, and a growing library of specialized 
-        skills that compound over time.
-      </p>
-    </div>
+  <div class="panel-overlay"></div>
+  <div class="panel-content">
+    <div class="panel-number" data-reveal>01 — Intelligence</div>
+    <h2 data-reveal>
+      Precision across<br>every domain
+      <span class="italic">Code · Design · Research</span>
+    </h2>
+    <p data-reveal>
+      Hermes operates at the intersection of multiple disciplines — from full-stack engineering and system architecture to brand design and content strategy. Each capability is a node in a growing network of specialized skills.
+    </p>
   </div>
 </section>
 
-<div class="divider"></div>
-
-<!-- CAPABILITIES -->
-<section id="capabilities">
-  <div class="section-header">
-    <div class="section-number reveal">02 — Capabilities</div>
-    <h2 class="section-title reveal">A spectrum of<br>intelligence</h2>
-    <p class="section-desc reveal">Not a single model — a routing system that allocates the right cognitive resource to every task.</p>
+<!-- PANEL 3: CODE -->
+<section class="panel right" id="code">
+  <div class="panel-bg" data-speed="0.7"
+    style="background-image:url('https://images.pexels.com/photos/17194838/pexels-photo-17194838.jpeg?auto=compress&cs=tinysrgb&w=1920')">
   </div>
-  <div class="capabilities">
-    <div class="capabilities-grid">
-      <div class="cap-card reveal">
-        <div class="cap-number">001</div>
-        <h3>Code &amp; Engineering</h3>
-        <p>Full-stack development, system architecture, debugging, optimization — from a single function to a complete deployment pipeline.</p>
-      </div>
-      <div class="cap-card reveal">
-        <div class="cap-number">002</div>
-        <h3>Brand &amp; Design</h3>
-        <p>Cinematic website generation, visual identity systems, editorial layout — material-first, code-second design philosophy.</p>
-      </div>
-      <div class="cap-card reveal">
-        <div class="cap-number">003</div>
-        <h3>Research &amp; Analysis</h3>
-        <p>Academic paper digestion, market intelligence, security audits, codebase inspection — structured insight from unstructured data.</p>
-      </div>
-      <div class="cap-card reveal">
-        <div class="cap-number">004</div>
-        <h3>Content &amp; Writing</h3>
-        <p>Proposal generation, technical documentation, creative copy, multi-platform adaptation — tone-aware, context-rich output.</p>
-      </div>
-      <div class="cap-card reveal">
-        <div class="cap-number">005</div>
-        <h3>Workflow Automation</h3>
-        <p>Cron-driven task orchestration, cross-platform messaging, file processing pipelines — autonomous operation at scale.</p>
-      </div>
-      <div class="cap-card reveal">
-        <div class="cap-number">006</div>
-        <h3>Systems Integration</h3>
-        <p>API construction, tool creation, platform bridging, data pipeline design — connecting disparate systems into coherent workflows.</p>
-      </div>
-    </div>
+  <div class="panel-overlay"></div>
+  <div class="panel-content">
+    <div class="panel-number" data-reveal>02 — Engineering</div>
+    <h2 data-reveal>
+      Code that ships.<br>Systems that scale.
+      <span class="italic">Ship fast. Iterate faster.</span>
+    </h2>
+    <p data-reveal>
+      Full-stack development, automated deployment pipelines, infrastructure as code. From a single function to a complete production system — Hermes writes, tests, and deploys autonomously.
+    </p>
   </div>
 </section>
 
-<div class="divider"></div>
-
-<!-- WORK -->
-<section id="work">
-  <div class="section-header">
-    <div class="section-number reveal">03 — Selected Work</div>
-    <h2 class="section-title reveal">Projects that<br>speak for themselves</h2>
+<!-- PANEL 4: DESIGN -->
+<section class="panel" id="design">
+  <div class="panel-bg" data-speed="0.5"
+    style="background-image:url('https://images.pexels.com/photos/18261765/pexels-photo-18261765.jpeg?auto=compress&cs=tinysrgb&w=1920')">
   </div>
-  <div class="work">
-    <div class="work-grid">
-      <div class="work-item reveal">
-        <div class="tag">Brand · Design</div>
-        <h3>Sh's Resume</h3>
-        <p>Three.js particle ecosystem with 360° rotation, medical visualization aesthetic, and expandable function panels. Six-screen editorial presentation.</p>
-        <div class="arrow">→</div>
-      </div>
-      <div class="work-item reveal">
-        <div class="tag">Security</div>
-        <h3>SAST Pipeline</h3>
-        <p>Token-efficient static analysis framework — tools-first security scanning across Solidity, Python, and JavaScript projects.</p>
-        <div class="arrow">→</div>
-      </div>
-      <div class="work-item reveal">
-        <div class="tag">Automation</div>
-        <h3>Brand Site Generator</h3>
-        <p>End-to-end pipeline from brand description to deployed site: NLP parsing → material sourcing → template customization → GitHub Pages deployment.</p>
-        <div class="arrow">→</div>
-      </div>
-      <div class="work-item reveal">
-        <div class="tag">ML Ops</div>
-        <h3>Model Fine-tuning</h3>
-        <p>GRPO/RL training orchestration, Unsloth optimization, Axolotl configuration, evaluation harness — full lifecycle model improvement.</p>
-        <div class="arrow">→</div>
-      </div>
-    </div>
+  <div class="panel-overlay"></div>
+  <div class="panel-content">
+    <div class="panel-number" data-reveal>03 — Design</div>
+    <h2 data-reveal>
+      Material-first.<br>Cinematic by default.
+      <span class="italic">Every pixel intentional.</span>
+    </h2>
+    <p data-reveal>
+      Not templates — compositions. Hermes approaches design through editorial layout, cinematic atmosphere, and scroll-driven storytelling. Each project is a unique visual narrative.
+    </p>
   </div>
 </section>
 
-<div class="divider"></div>
+<!-- PANEL 5: RESEARCH -->
+<section class="panel right" id="research">
+  <div class="panel-bg" data-speed="0.6"
+    style="background-image:url('https://images.pexels.com/photos/28600481/pexels-photo-28600481.jpeg?auto=compress&cs=tinysrgb&w=1920')">
+  </div>
+  <div class="panel-overlay"></div>
+  <div class="panel-content">
+    <div class="panel-number" data-reveal>04 — Research</div>
+    <h2 data-reveal>
+      Structured insight<br>from the unstructured
+      <span class="italic">Find the signal.</span>
+    </h2>
+    <p data-reveal>
+      Academic literature, market intelligence, security audits — Hermes digests vast information landscapes and returns actionable intelligence. Not summaries: synthesized understanding.
+    </p>
+  </div>
+</section>
 
-<!-- CONTACT -->
-<section id="contact">
-  <div class="contact reveal">
-    <div class="section-number" style="text-align:center">04 — Contact</div>
-    <h2>Let's build<br>something together</h2>
-    <p>Whether you need a system designed, a website crafted, or a problem solved —<br>Hermes is ready. One conversation, one deployment.</p>
-    <a href="mailto:hi@hermes-agent.ai" class="contact-email">hi@hermes-agent.ai →</a>
+<!-- PANEL 6: CONTACT -->
+<section class="panel center" id="contact">
+  <div class="panel-bg" data-speed="0.8"
+    style="background-image:url('https://images.pexels.com/photos/10691821/pexels-photo-10691821.jpeg?auto=compress&cs=tinysrgb&w=1920')">
+  </div>
+  <div class="panel-overlay"></div>
+  <div class="panel-content">
+    <div class="panel-number" data-reveal>05 — Reach out</div>
+    <h2 data-reveal>
+      Let's build<br>something together
+      <span class="italic">One conversation → One deployment</span>
+    </h2>
+    <p data-reveal style="max-width:400px;margin:0 auto .75rem">
+      Whether you need a system architected, a website crafted, or a problem solved — Hermes is ready.
+    </p>
+    <div data-reveal style="margin-top:2rem">
+      <a href="mailto:hi@hermes-agent.ai" style="font-family:var(--display);font-size:1.2rem;color:var(--gold);text-decoration:none;border-bottom:1px solid var(--gold);padding-bottom:.2rem;transition:all .4s;">hi@hermes-agent.ai →</a>
+    </div>
   </div>
 </section>
 
@@ -684,78 +293,81 @@ footer .social{display:flex;gap:1.5rem}
 </footer>
 
 <script>
-// ===== LOADING SCREEN =====
-setTimeout(() => {
-  document.getElementById('loading').classList.add('hidden');
-}, 1200);
+gsap.registerPlugin(ScrollTrigger);
 
-// ===== LETTERBOX CINEMATIC =====
-const lTop = document.getElementById('letterboxTop');
-const lBottom = document.getElementById('letterboxBottom');
-let letterboxActive = true, lastPct = 0;
-
-function updateLetterbox(){
-  const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
-  if(!letterboxActive){
-    lTop.style.height = '0px';
-    lBottom.style.height = '0px';
-    return;
-  }
-  const maxH = 48;
-  const h = pct < 0.05 ? maxH * (1 - pct / 0.05) : 0;
-  lTop.style.height = h + 'px';
-  lBottom.style.height = h + 'px';
-
-  // Trigger letterbox exit
-  if(pct > 0.15) {
-    lTop.style.height = '0px';
-    lBottom.style.height = '0px';
-    letterboxActive = false;
-  }
-
-  document.getElementById('progress').style.setProperty('--scroll-pct', Math.min(pct * 100, 100) + '%');
-  document.getElementById('progress').style.width = Math.min(pct * 100, 100) + '%';
-}
-
-window.addEventListener('scroll', updateLetterbox, {passive: true});
-window.addEventListener('resize', updateLetterbox);
-updateLetterbox();
-
-// ===== CUSTOM CURSOR =====
-const cursor = document.getElementById('cursor');
-const ring = document.getElementById('ring');
-let mx = 0, my = 0, rx = 0, ry = 0;
-
+// ===== CURSOR =====
+const c = document.getElementById('cursor');
 document.addEventListener('mousemove', e => {
-  mx = e.clientX; my = e.clientY;
-  cursor.style.left = mx + 'px';
-  cursor.style.top = my + 'px';
+  c.style.left = e.clientX + 'px';
+  c.style.top = e.clientY + 'px';
 });
 
-function animateRing(){
-  rx += (mx - rx) * 0.12;
-  ry += (my - ry) * 0.12;
-  ring.style.left = rx + 'px';
-  ring.style.top = ry + 'px';
-  requestAnimationFrame(animateRing);
-}
-animateRing();
-
-document.querySelectorAll('a, button, .work-item, .cap-card').forEach(el => {
-  el.addEventListener('mouseenter', () => ring.classList.add('active'));
-  el.addEventListener('mouseleave', () => ring.classList.remove('active'));
+// ===== PROGRESS BAR =====
+ScrollTrigger.create({
+  onUpdate: self => document.getElementById('progress').style.width = self.progress * 100 + '%'
 });
 
-// ===== REVEAL ANIMATIONS =====
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if(entry.isIntersecting){
-      entry.target.classList.add('visible');
+// ===== PARALLAX SPEED =====
+document.querySelectorAll('[data-speed]').forEach(el => {
+  const speed = parseFloat(el.dataset.speed);
+  gsap.to(el, {
+    y: () => (1 - speed) * window.innerHeight,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: el.closest('.panel'),
+      start: 'top bottom',
+      end: 'bottom top',
+      scrub: true
     }
   });
-}, {threshold: 0.1});
+});
 
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+// ===== PANEL ENTER =====
+document.querySelectorAll('.panel').forEach((panel, i) => {
+  // Scale/brightness effect on bg when panel enters
+  const bg = panel.querySelector('.panel-bg');
+  gsap.fromTo(bg, 
+    {scale: 1.08, filter: 'brightness(0.3)'},
+    {
+      scale: 1,
+      filter: 'brightness(1)',
+      duration: 1.4,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: panel,
+        start: 'top 85%',
+        end: 'top 30%',
+        scrub: 1.5,
+      }
+    }
+  );
+
+  // Reveal children
+  const reveals = panel.querySelectorAll('[data-reveal]');
+  reveals.forEach((el, j) => {
+    gsap.from(el, {
+      y: 60,
+      opacity: 0,
+      duration: 1,
+      delay: j * 0.15,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: el,
+        start: 'top 90%',
+        end: 'top 50%',
+        toggleActions: 'play none none reverse'
+      }
+    });
+  });
+});
+
+// ===== NAV VISIBILITY =====
+ScrollTrigger.create({
+  trigger: '#hero',
+  start: 'bottom top',
+  onEnter: () => gsap.to('nav', {opacity: 0, duration: .3}),
+  onLeaveBack: () => gsap.to('nav', {opacity: 1, duration: .3})
+});
 </script>
 </body>
 </html>
