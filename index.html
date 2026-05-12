@@ -10,16 +10,14 @@
 <style>
 *,::before,::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --gold:#c8a97e; --gold2:#e0c9a8; --cyan:#6aa0c0;
-  --bg:#0a0a0c; --text:#e8e4dd; --dim:#7a7873;
-  --dspl:'Playfair Display',Georgia,serif;
-  --body:'Inter',sans-serif;
+  --gold:#c8a97e; --gold2:#e0c9a8; --cyan:#6aa0c0; --dim:#6b6965;
+  --bg:#070709; --text:#e8e4dd; --dspl:'Playfair Display',Georgia,serif; --body:'Inter',sans-serif;
 }
 html{background:var(--bg);overscroll-behavior:none}
 body{
   background:var(--bg);color:var(--text);
-  font-family:var(--body);font-weight:300;
-  overflow-x:hidden;line-height:1.6;
+  font-family:var(--body);font-weight:200;
+  overflow-x:hidden;line-height:1.7;
 }
 /* NAV */
 nav{
@@ -29,11 +27,11 @@ nav{
   mix-blend-mode:difference;pointer-events:none;
 }
 nav *{pointer-events:auto}
-nav .logo{font-family:var(--dspl);font-size:.9rem;letter-spacing:.2em;color:#fff;text-decoration:none}
+nav .logo{font-family:var(--dspl);font-size:1rem;letter-spacing:.25em;color:#fff;text-decoration:none}
 nav .nav-links{display:flex;gap:2rem}
 nav .nav-links a{
-  font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;
-  color:rgba(255,255,255,.5);text-decoration:none;transition:color .4s;
+  font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;
+  color:rgba(255,255,255,.4);text-decoration:none;transition:color .5s;
 }
 nav .nav-links a:hover{color:#fff}
 
@@ -41,72 +39,108 @@ nav .nav-links a:hover{color:#fff}
 #progress{
   position:fixed;top:0;left:0;width:0;height:1px;
   background:var(--gold);z-index:200;
-  transition:width .1s;
 }
 
-/* SECTION WRAPPER — continuous scroll */
-.section{
+/* ===== SECTIONS ===== */
+.scene{
   position:relative;width:100%;
-  min-height:100vh;
+  height:100vh;
   display:flex;align-items:center;
   overflow:hidden;
 }
-.section .bg{
-  position:absolute;inset:0;z-index:0;
+.scene video,.scene .bg{
+  position:absolute;inset:-10%;z-index:0;
+  width:120%;height:120%;
+  object-fit:cover;
   background-size:cover;background-position:center;
-  will-change:filter,transform,opacity;
 }
-.section .overlay{
+.scene .overlay{
   position:absolute;inset:0;z-index:1;
   pointer-events:none;
 }
-.section .content{
+.scene .content{
   position:relative;z-index:2;
-  padding:4rem 8rem;
   pointer-events:none;
+  width:100%;
 }
-/* ===== TEXT POSITION VARIANTS ===== */
-/* content in negative space of each image */
-.section .content.bl{
-  padding:4rem 8rem 6rem;
-  align-self:flex-end;
-}
-.section .content.tl{padding:8rem 8rem 4rem;align-self:flex-start}
-.section .content.tr{text-align:right;margin-left:auto;padding:8rem 8rem 4rem}
-.section .content.br{text-align:right;margin-left:auto;padding:4rem 8rem 6rem;align-self:flex-end}
-.section .content.cc{text-align:center;margin:auto;max-width:700px}
 
-/* Number label */
+/* Layout variants — text placed where photo has negative space */
+.content-wrap{
+  padding:3rem 6rem;
+  max-width:520px;
+}
+
+/* LEFT — text in left negative space */
+.scene .content.left .content-wrap{
+  margin-right:auto;
+}
+
+/* RIGHT — text in right negative space */
+.scene .content.right .content-wrap{
+  margin-left:auto;
+  text-align:right;
+}
+
+/* CENTER — text centered */
+.scene .content.center .content-wrap{
+  margin:0 auto;
+  text-align:center;
+}
+
+/* BOTTOM — text in bottom negative space */
+.scene .content.bottom .content-wrap{
+  margin-top:auto;
+  margin-bottom:4rem;
+}
+
+/* BOTTOM-LEFT */
+.scene .content.bl .content-wrap{
+  margin-right:auto;
+  margin-top:auto;
+  margin-bottom:3rem;
+}
+
+/* ===== BRIDGE ===== */
+.bridge{
+  position:relative;width:100%;height:40vh;
+  overflow:hidden;
+  z-index:1;
+}
+
+/* ===== TYPOGRAPHY ===== */
 .label{
-  font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:1.25rem;
+  font-size:.55rem;letter-spacing:.35em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1rem;
   font-weight:400;
 }
-.section h2{
+.scene h2{
   font-family:var(--dspl);
   font-weight:700;
-  font-size:clamp(2rem,5vw,4rem);
-  line-height:.95;
+  font-size:clamp(2rem,4.5vw,3.8rem);
+  line-height:.92;
   margin-bottom:1rem;
 }
-.section h2 .i{font-style:italic;font-weight:400;color:var(--gold);display:block}
-.section p{
-  font-size:clamp(.85rem,1.1vw,1rem);
+.scene h2 .i{font-style:italic;font-weight:300;color:var(--gold);display:block}
+.scene p{
+  font-size:.9rem;
   color:var(--dim);
   line-height:1.8;
-  max-width:400px;
 }
-.section .content.tr p,.section .content.br p{margin-left:auto}
+.scene .content.right .content-wrap p,
+.scene .content.center .content-wrap p{margin-left:auto;max-width:400px}
+.scene .content.right .content-wrap p{margin-left:auto}
 
-/* ===== BRIDGE SECTION — smooth transition ===== */
-.bridge{
-  position:relative;width:100%;height:60vh;
-  overflow:hidden;
+/* ===== FOOTER ===== */
+footer{
+  padding:2rem 6rem;
+  display:flex;justify-content:space-between;
+  font-size:.7rem;color:var(--dim);
+  background:var(--bg);
+  border-top:1px solid rgba(255,255,255,.03);
 }
-.bridge .bg{
-  position:absolute;inset:0;z-index:0;
-  background-size:cover;background-position:center;
-}
+footer a{color:var(--dim);text-decoration:none;transition:color .4s}
+footer a:hover{color:var(--gold)}
+footer .social{display:flex;gap:1.5rem}
 
 /* ===== CURSOR ===== */
 .cursor-dot{
@@ -115,33 +149,15 @@ nav .nav-links a:hover{color:#fff}
   pointer-events:none;z-index:9999;
   transform:translate(-50%,-50%);
   mix-blend-mode:difference;
-  transition:opacity .3s;
 }
 body:not(:hover) .cursor-dot{opacity:0}
 
-/* ===== FOOTER ===== */
-footer{
-  padding:3rem 8rem;
-  display:flex;justify-content:space-between;
-  font-size:.7rem;color:var(--dim);
-  border-top:1px solid rgba(255,255,255,.04);
-}
-footer a{color:var(--dim);text-decoration:none;transition:color .4s}
-footer a:hover{color:var(--gold)}
-footer .social{display:flex;gap:1.5rem}
-
 @media(max-width:1024px){
-  .section .content{padding:3rem}
-  .section .content.bl,.section .content.br{padding:2rem}
-  .section .content.tr,.section .content.tl{padding:2rem}
-  section h2{font-size:2.2rem}
-  .bridge{height:30vh}
-}
-@media(max-width:768px){
-  nav{padding:1.5rem}
   nav .nav-links{display:none}
-  .section .content{padding:2rem}
-  .section p{max-width:100%}
+  .scene{height:auto;min-height:100vh}
+  .content-wrap{padding:2rem 3rem;max-width:100%}
+  .scene .content.right .content-wrap{text-align:left}
+  .bridge{height:20vh}
   footer{padding:2rem;flex-direction:column;gap:.5rem;text-align:center}
 }
 </style>
@@ -161,128 +177,160 @@ footer .social{display:flex;gap:1.5rem}
   </div>
 </nav>
 
-<!-- ===== SECTION 1: HERO ===== -->
-<!-- DeepMind neural network: text in lower-left negative space -->
-<section class="section" id="hero">
-  <div class="bg"
-    data-parallax="0.85"
-    style="background-image:url('https://images.pexels.com/photos/17483870/pexels-photo-17483870.png?auto=compress&cs=tinysrgb&w=1920')">
-  </div>
-  <div class="overlay" style="background:linear-gradient(135deg,rgba(10,10,12,.7),rgba(10,10,12,.15) 40%,transparent 70%)"></div>
+<!-- ===== SCENE 1: HERO ===== -->
+<!-- 3D ai network: text BL, neural warm light -->
+<section class="scene" id="hero">
+  <video class="bg" autoplay muted loop playsinline
+    src="https://images.pexels.com/videos/6278976_raw_premium.mp4"
+    poster="https://raw.githubusercontent.com/yihangwu539-png/hermes-brand/main/abstract-dark-bg.jpg"
+    style="object-fit:cover">
+  </video>
+  <div class="overlay" style="background:linear-gradient(135deg,rgba(7,7,9,.65),rgba(7,7,9,.15) 40%,transparent 60%)"></div>
   <div class="content bl">
-    <div class="label" data-reveal>AI Agent · Autonomous</div>
-    <h2 data-reveal>
-      Hermes
-      <span class="i">The Messenger</span>
-    </h2>
-    <p data-reveal>
-      An autonomous AI agent bridging human intention<br>
-      and machine execution — building, analyzing,<br>
-      and creating at the speed of thought.
-    </p>
+    <div class="content-wrap">
+      <div class="label" data-reveal>AI Agent · Autonomous</div>
+      <h2 data-reveal>
+        Hermes
+        <span class="i">The Messenger</span>
+      </h2>
+      <p data-reveal>
+        An autonomous agent bridging human intention<br>
+        and machine execution — building, analyzing,<br>
+        and creating at the speed of thought.
+      </p>
+    </div>
   </div>
 </section>
 
-<!-- ===== BRIDGE 1→2 ===== -->
+<!-- Bridge 1→2: pure color fade -->
 <div class="bridge">
-  <div class="bg" style="background:linear-gradient(180deg,transparent,var(--bg))"></div>
+  <div class="overlay" style="background:linear-gradient(180deg,transparent,#0d0e12)"></div>
 </div>
 
-<!-- ===== SECTION 2: INTELLIGENCE ===== -->
-<!-- Fiber optic/data stream: text bottom-center in dark negative space -->
-<section class="section" id="intelligence">
-  <div class="bg"
-    data-parallax="0.7"
+<!-- ===== SCENE 2: INTELLIGENCE ===== -->
+<!-- Fiber optic: text centered-bottom in dark area -->
+<section class="scene" id="intelligence">
+  <div class="bg" data-parallax="0.7"
     style="background-image:url('https://images.pexels.com/photos/17194840/pexels-photo-17194840.jpeg?auto=compress&cs=tinysrgb&w=1920')">
   </div>
-  <div class="overlay" style="background:linear-gradient(0deg,rgba(10,10,12,.7) 0%,transparent 50%)"></div>
-  <div class="content cc" style="margin-top:auto;padding-bottom:5rem">
-    <div class="label" data-reveal>01 — Intelligence</div>
-    <h2 data-reveal>
-      Precision across<br>every domain
-    </h2>
-    <p data-reveal style="max-width:500px">
-      From engineering and design to research and content — Hermes operates across disciplines, selecting the right approach for each unique challenge. Not a single model: a routing system that allocates the right cognitive resource for every task.
-    </p>
+  <div class="overlay" style="background:linear-gradient(0deg,rgba(7,7,9,.7) 0%,transparent 45%)"></div>
+  <!-- Text in bottom-center: negative space is lower dark area -->
+  <div class="content bottom" style="text-align:center">
+    <div class="content-wrap" style="margin:0 auto;text-align:center">
+      <div class="label" data-reveal>01 — Intelligence</div>
+      <h2 data-reveal>
+        Precision across<br>every domain
+      </h2>
+      <p data-reveal style="margin:0 auto;max-width:500px">
+        From engineering to design, from research to content — a routing system that allocates the right cognitive resource for every task. Not brute force: intelligent allocation.
+      </p>
+    </div>
   </div>
 </section>
 
-<!-- ===== SECTION 3: CODE ===== -->
-<!-- Circuit board: text in upper-right lighter area -->
-<section class="section" id="code">
-  <div class="bg"
-    data-parallax="0.8"
-    style="background-image:url('https://images.pexels.com/photos/31995010/pexels-photo-31995010.jpeg?auto=compress&cs=tinysrgb&w=1920')">
-  </div>
-  <div class="overlay" style="background:linear-gradient(225deg,rgba(10,10,12,.75) 0%,rgba(10,10,12,.2) 50%,transparent 70%)"></div>
-  <div class="content tr">
-    <div class="label" data-reveal>02 — Engineering</div>
-    <h2 data-reveal>
-      Code that ships.<br>
-      <span class="i">Systems that scale.</span>
-    </h2>
-    <p data-reveal>
-      Full-stack development, automated pipelines, infrastructure as code. From a single function to a complete production system — written, tested, and deployed autonomously.
-    </p>
-  </div>
-</section>
+<!-- Bridge 2→3 -->
+<div class="bridge">
+  <div class="overlay" style="background:linear-gradient(180deg,transparent,#070709)"></div>
+</div>
 
-<!-- ===== SECTION 4: DESIGN ===== -->
-<!-- Abstract matrix: text in lower-left darker area -->
-<section class="section" id="design">
-  <div class="bg"
-    data-parallax="0.75"
+<!-- ===== SCENE 3: ENGINEERING ===== -->
+<!-- Matrix abstract: text in lower-left, darker area -->
+<section class="scene" id="engineering">
+  <div class="bg" data-parallax="0.75"
     style="background-image:url('https://images.pexels.com/photos/30547576/pexels-photo-30547576.jpeg?auto=compress&cs=tinysrgb&w=1920')">
   </div>
-  <div class="overlay" style="background:linear-gradient(135deg,rgba(10,10,12,.6),transparent 50%,rgba(10,10,12,.3))"></div>
+  <div class="overlay" style="background:linear-gradient(135deg,rgba(7,7,9,.55),transparent 45%,rgba(7,7,9,.3))"></div>
+  <!-- Red/black abstract: bottom-left is darker -->
   <div class="content bl">
-    <div class="label" data-reveal>03 — Design</div>
-    <h2 data-reveal>
-      Material-first.<br>
-      <span class="i">Cinematic by default.</span>
-    </h2>
-    <p data-reveal>
-      Not templates — compositions. Editorial layout, cinematic atmosphere, scroll-driven storytelling. Every pixel is intentional, every project a unique visual narrative.
-    </p>
+    <div class="content-wrap">
+      <div class="label" data-reveal>02 — Engineering</div>
+      <h2 data-reveal>
+        Code that ships.<br>
+        <span class="i">Systems that scale.</span>
+      </h2>
+      <p data-reveal>
+        Full-stack development, automated pipelines, infrastructure as code — from a single function to a complete production system, written and deployed autonomously.
+      </p>
+    </div>
   </div>
 </section>
 
-<!-- ===== SECTION 5: RESEARCH ===== -->
-<!-- Code macro: text upper-right in lighter area -->
-<section class="section" id="research">
-  <div class="bg"
-    data-parallax="0.8"
+<!-- Bridge 3→4 -->
+<div class="bridge">
+  <div class="overlay" style="background:linear-gradient(180deg,transparent,#0d0e12)"></div>
+</div>
+
+<!-- ===== SCENE 4: DESIGN ===== -->
+<!-- Circuit board: text in upper-right lighter area -->
+<section class="scene" id="design">
+  <div class="bg" data-parallax="0.8"
+    style="background-image:url('https://images.pexels.com/photos/31995010/pexels-photo-31995010.jpeg?auto=compress&cs=tinysrgb&w=1920')">
+  </div>
+  <div class="overlay" style="background:linear-gradient(225deg,rgba(7,7,9,.7),rgba(7,7,9,.15) 45%,transparent 65%)"></div>
+  <!-- Circuit has lighter area upper-right, text there -->
+  <div class="content right">
+    <div class="content-wrap">
+      <div class="label" data-reveal>03 — Design</div>
+      <h2 data-reveal>
+        Material-first.<br>
+        <span class="i">Cinematic by default.</span>
+      </h2>
+      <p data-reveal>
+        Not templates — compositions. Editorial layout, cinematic atmosphere, scroll-driven storytelling. Every pixel intentional, every project a unique visual narrative.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Bridge 4→5 -->
+<div class="bridge">
+  <div class="overlay" style="background:linear-gradient(180deg,transparent,#070709)"></div>
+</div>
+
+<!-- ===== SCENE 5: RESEARCH ===== -->
+<!-- Code macro: text in upper-right where screen is bright -->
+<section class="scene" id="research">
+  <div class="bg" data-parallax="0.8"
     style="background-image:url('https://images.pexels.com/photos/37227160/pexels-photo-37227160.jpeg?auto=compress&cs=tinysrgb&w=1920')">
   </div>
-  <div class="overlay" style="background:linear-gradient(225deg,rgba(10,10,12,.65),transparent 50%)"></div>
-  <div class="content tr">
-    <div class="label" data-reveal>04 — Research</div>
-    <h2 data-reveal>
-      Structured insight<br>from the unstructured
-    </h2>
-    <p data-reveal>
-      Academic literature, market intelligence, security audits — vast landscapes of information distilled into actionable understanding. Not summaries: synthesized intelligence.
-    </p>
+  <div class="overlay" style="background:linear-gradient(225deg,rgba(7,7,9,.6),transparent 50%)"></div>
+  <!-- Code screenshot: top-right lighter, text right-aligned -->
+  <div class="content right">
+    <div class="content-wrap">
+      <div class="label" data-reveal>04 — Research</div>
+      <h2 data-reveal>
+        Structured insight<br>from the unstructured
+      </h2>
+      <p data-reveal>
+        Literature, intelligence, audits — vast information landscapes distilled into actionable understanding. Not summaries: synthesized knowledge.
+      </p>
+    </div>
   </div>
 </section>
 
-<!-- ===== SECTION 6: CONTACT ===== -->
-<section class="section" id="contact">
-  <div class="bg"
-    data-parallax="0.9"
-    style="background:linear-gradient(135deg,#0d0d10 0%,#1a1a20 50%,#0d0d10 100%)">
+<!-- Bridge 5→6 -->
+<div class="bridge">
+  <div class="overlay" style="background:linear-gradient(180deg,transparent,#0d0e12)"></div>
+</div>
+
+<!-- ===== SCENE 6: CONTACT ===== -->
+<section class="scene" id="contact">
+  <div class="bg" data-parallax="0.9"
+    style="background:radial-gradient(ellipse at center,#1a1a24 0%,#0a0a10 70%)">
   </div>
-  <div class="overlay" style="background:radial-gradient(ellipse at center,transparent 30%,rgba(10,10,12,.6))"></div>
-  <div class="content cc">
-    <div class="label" data-reveal>05 — Reach out</div>
-    <h2 data-reveal>
-      Let's build<br>something together
-    </h2>
-    <p data-reveal style="max-width:380px;margin:0 auto 2rem">
-      One conversation, one deployment. Whether you need a system architected, a website crafted, or a problem solved.
-    </p>
-    <div data-reveal>
-      <a href="mailto:hi@hermes-agent.ai" style="font-family:var(--dspl);font-size:1.1rem;color:var(--gold);text-decoration:none;border-bottom:1px solid var(--gold);padding-bottom:.15rem;transition:all .4s;">hi@hermes-agent.ai →</a>
+  <div class="overlay" style="background:radial-gradient(ellipse at center,transparent 30%,rgba(7,7,9,.5))"></div>
+  <div class="content center">
+    <div class="content-wrap" style="max-width:500px;text-align:center">
+      <div class="label" data-reveal>05 — Reach out</div>
+      <h2 data-reveal>
+        Let's build<br>something together
+      </h2>
+      <p data-reveal style="margin:0 auto 2rem;max-width:380px">
+        One conversation, one deployment. Whether you need a system architected, a website crafted, or a problem solved.
+      </p>
+      <div data-reveal>
+        <a href="mailto:hi@hermes-agent.ai" style="font-family:var(--dspl);font-size:1.1rem;color:var(--gold);text-decoration:none;border-bottom:1px solid var(--gold);padding-bottom:.15rem;transition:all .4s;">hi@hermes-agent.ai →</a>
+      </div>
     </div>
   </div>
 </section>
@@ -299,89 +347,75 @@ footer .social{display:flex;gap:1.5rem}
 <script>
 gsap.registerPlugin(ScrollTrigger);
 
-// cursor
 const c = document.getElementById('cursor');
 document.addEventListener('mousemove', e => {
   c.style.left = e.clientX + 'px';
   c.style.top = e.clientY + 'px';
 });
 
-// progress
+// PROGRESS
 ScrollTrigger.create({
   onUpdate: self => document.getElementById('progress').style.width = self.progress * 100 + '%'
 });
 
-// PARALLAX — each bg moves at its own speed
+// PARALLAX
 document.querySelectorAll('[data-parallax]').forEach(el => {
   const speed = parseFloat(el.dataset.parallax);
-  const section = el.closest('.section') || el.closest('.bridge');
+  const scene = el.closest('.scene');
   gsap.to(el, {
-    y: () => (1 - speed) * window.innerHeight * 0.5,
+    y: () => (1 - speed) * window.innerHeight * 0.35,
     ease: 'none',
-    scrollTrigger: {
-      trigger: section,
-      start: 'top bottom',
-      end: 'bottom top',
-      scrub: 1.2
-    }
+    scrollTrigger: { trigger: scene, start: 'top bottom', end: 'bottom top', scrub: 1.5 }
   });
 });
 
-// REVEAL text elements — smoother and more continuous feel
-document.querySelectorAll('[data-reveal]').forEach(el => {
-  gsap.from(el, {
-    y: 40,
-    opacity: 0,
-    duration: 1.2,
-    ease: 'power2.out',
-    scrollTrigger: {
-      trigger: el,
-      start: 'top 90%',
-      end: 'top 60%',
-      scrub: 1
-    }
-  });
-});
-
-// BRIGHTNESS transition on section enter
-document.querySelectorAll('.section').forEach(section => {
-  const bg = section.querySelector('.bg');
-  if(!bg || bg.style.background.startsWith('linear')) return;
+// BRIGHTNESS ENTER
+document.querySelectorAll('.scene').forEach(scene => {
+  const bg = scene.querySelector('.bg');
+  if(!bg || bg.tagName === 'VIDEO') return;
+  if(bg.style.background.startsWith('radial') || bg.style.background.startsWith('linear')) return;
   gsap.fromTo(bg, 
-    {filter: 'brightness(0.4) saturate(0.5)'},
-    {
-      filter: 'brightness(1) saturate(1)',
-      duration: 1.5,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: section,
-        start: 'top 85%',
-        end: 'top 30%',
-        scrub: 1.5
-      }
+    {filter: 'brightness(0.35) saturate(0.4) scale(1.1)'},
+    {filter: 'brightness(1) saturate(1) scale(1)', duration: 1.5, ease: 'power2.out',
+      scrollTrigger: { trigger: scene, start: 'top 85%', end: 'top 25%', scrub: 1.5 }
     }
   );
 });
 
-// BRIDGE sections — fade backgrounds
-document.querySelectorAll('.bridge').forEach(bridge => {
-  gsap.fromTo(bridge, {opacity: 0}, {
-    opacity: 1,
-    scrollTrigger: {
-      trigger: bridge,
-      start: 'top bottom',
-      end: 'top center',
-      scrub: 1
-    }
+// REVEAL — smoother, slower
+document.querySelectorAll('[data-reveal]').forEach(el => {
+  gsap.from(el, {
+    y: 35, opacity: 0, duration: 1.2, ease: 'power2.out',
+    scrollTrigger: { trigger: el, start: 'top 92%', end: 'top 55%', scrub: 1.2 }
   });
 });
 
-// nav visibility — hide on scroll, show on top
+// BRIDGES fade in
+document.querySelectorAll('.bridge').forEach(b => {
+  gsap.fromTo(b, {opacity: 0}, {
+    opacity: 1,
+    scrollTrigger: { trigger: b, start: 'top bottom', end: 'top 60%', scrub: 1 }
+  });
+});
+
+// HERO video — try to load video background
+const heroVideo = document.querySelector('#hero video');
+if(heroVideo) {
+  heroVideo.playbackRate = 0.6;
+  heroVideo.play().catch(() => {
+    // video fails (likely blocked), fallback to static bg
+    heroVideo.style.display = 'none';
+    heroVideo.parentElement.querySelector('.bg')?.style.setProperty('background-image', 
+      "url('https://raw.githubusercontent.com/yihangwu539-png/hermes-brand/main/abstract-dark-bg.jpg')");
+  });
+}
+
+// nav visibility
 ScrollTrigger.create({
   trigger: '#hero',
   start: 'bottom top',
-  onEnter: () => gsap.to('nav', {opacity: 0, duration: .4}),
-  onLeaveBack: () => gsap.to('nav', {opacity: 1, duration: .4})
+  onEnter: () => gsap.to('nav', {opacity: 0, duration: .3}),
+  onLeaveBack: () => gsap.to('nav', {opacity: 1, duration: .3})
 });
 </script>
 </body>
